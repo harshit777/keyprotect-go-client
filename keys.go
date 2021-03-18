@@ -52,8 +52,10 @@ type Key struct {
 	LastUpdateDate      *time.Time  `json:"lastUpdateDate,omitempty"`
 	LastRotateDate      *time.Time  `json:"lastRotateDate,omitempty"`
 	KeyVersion          *KeyVersion `json:"keyVersion,omitempty" mapstructure:keyVersion`
+	KeyRingID           string      `json:"keyRingID,omitempty"`
 	Extractable         bool        `json:"extractable"`
 	Expiration          *time.Time  `json:"expirationDate,omitempty"`
+	Imported            bool        `json:"imported,omitempty"`
 	Payload             string      `json:"payload,omitempty"`
 	State               int         `json:"state,omitempty"`
 	EncryptionAlgorithm string      `json:"encryptionAlgorithm,omitempty"`
@@ -76,6 +78,17 @@ type KeysMetadata struct {
 type Keys struct {
 	Metadata KeysMetadata `json:"metadata"`
 	Keys     []Key        `json:"resources"`
+}
+
+type KeyVersionsMetadata struct {
+	CollectionType  string `json:"collectionType"`
+	CollectionTotal int    `json:"collectionTotal"`
+	TotalCount      int    `json:"totalCount"`
+}
+
+type KeyVersions struct {
+	Metadata   KeyVersionsMetadata `json:"metadata"`
+	KeyVersion []KeyVersion        `json:"resources"`
 }
 
 // KeysActionRequest represents request parameters for a key action
@@ -147,10 +160,9 @@ func (c *Client) CreateImportedStandardKey(ctx context.Context, name string, exp
 // For more information please refer to the links below:
 // https://cloud.ibm.com/docs/key-protect?topic=key-protect-create-root-keys#create-root-key-api
 // https://cloud.ibm.com/docs/key-protect?topic=key-protect-create-standard-keys#create-standard-key-api
-func (c *Client) CreateKeyWithAliases(ctx context.Context, name string, expiration *time.Time, extractable bool, aliases []string) (*Key, error){
+func (c *Client) CreateKeyWithAliases(ctx context.Context, name string, expiration *time.Time, extractable bool, aliases []string) (*Key, error) {
 	return c.CreateImportedKeyWithAliases(ctx, name, expiration, "", "", "", extractable, aliases)
 }
-
 
 // CreateImportedKeyWithAliases creates a new key with alias name and provided key material. A key can have a maximum of 5 alias names
 // When importing root keys with import-token encryptedNonce and iv need to passed along with payload.
@@ -164,7 +176,7 @@ func (c *Client) CreateImportedKeyWithAliases(ctx context.Context, name string, 
 		Type:        keyType,
 		Extractable: extractable,
 		Payload:     payload,
-		Aliases: aliases,
+		Aliases:     aliases,
 	}
 
 	if !extractable && payload != "" && encryptedNonce != "" && iv != "" {
@@ -179,7 +191,6 @@ func (c *Client) CreateImportedKeyWithAliases(ctx context.Context, name string, 
 
 	return c.createKey(ctx, key)
 }
-
 
 func (c *Client) createKey(ctx context.Context, key Key) (*Key, error) {
 	keysRequest := Keys{
@@ -247,18 +258,35 @@ func (c *Client) GetKeyMetadata(ctx context.Context, idOrAlias string) (*Key, er
 
 func (c *Client) getKey(ctx context.Context, id string, path string) (*Key, error) {
 	keys := Keys{}
-
 	req, err := c.newRequest("GET", fmt.Sprintf(path, id), nil)
 	if err != nil {
 		return nil, err
 	}
-
 	_, err = c.do(ctx, req, &keys)
 	if err != nil {
 		return nil, err
 	}
 
 	return &keys.Keys[0], nil
+}
+
+func (c *Client) GetKeyVersions(ctx context.Context, id string, limit int, offset int, totalCount bool) (*KeyVersions, int, error) {
+	keyVersion := KeyVersions{}
+	req, err := c.newRequest("GET", fmt.Sprintf("keys/%s/versions", id), nil)
+	if err != nil {
+		return nil, 0, err
+	}
+	v := url.Values{}
+	v.Set("limit", strconv.Itoa(limit))
+	v.Set("offset", strconv.Itoa(offset))
+	v.Set("totalCount", strconv.FormatBool(totalCount))
+	req.URL.RawQuery = v.Encode()
+	_, err = c.do(ctx, req, &keyVersion)
+	if err != nil {
+		return nil, 0, err
+	}
+	count := keyVersion.Metadata.TotalCount
+	return &keyVersion, count, nil
 }
 
 type CallOpt interface{}

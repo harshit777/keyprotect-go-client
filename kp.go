@@ -262,7 +262,6 @@ func (c *Client) do(ctx context.Context, req *http.Request, res interface{}) (*h
 	if err != nil {
 		return nil, err
 	}
-
 	response, err := retryableClient.Do(retryableRequest.WithContext(ctx))
 	if err != nil {
 		return nil, &URLError{err, corrID}
