@@ -24,6 +24,7 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"net/url"
 	"strings"
@@ -184,9 +185,9 @@ func (c *Client) newRequest(method, path string, body interface{}) (*http.Reques
 	}
 
 	request.Header.Set("accept", "application/json")
-	fmt.Println("Overriding the instance ID =====>>>", c.Config.InstanceID)
+	log.Printf("Overriding the instance ID =====>>>", c.Config.InstanceID)
 	request.Header.Set("bluemix-instance", c.Config.InstanceID)
-	fmt.Println("Overriding the Config", c.Config)
+	fmt.Println("Overriding the Config", c.Confi)
 
 	return request, nil
 }
