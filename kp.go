@@ -508,3 +508,12 @@ func redact(s string, redactStrings []string) string {
 func noredact(s string, redactStrings []string) string {
 	return s
 }
+
+func (c *Client) Clone() *Client {
+	if iam.IsNil(c) {
+		return nil
+	}
+	clone := *c
+	clone.Config.Instance = c.Config.Instance.Clone()
+	return &clone
+}
