@@ -158,6 +158,8 @@ func NewWithLogger(config ClientConfig, transport http.RoundTripper, logger Logg
 		Logger:      logger,
 		tokenSource: ts,
 	}
+
+	log.Printf("Overriding the instance ID in Client =====>>>", c.Config.InstanceID)
 	return c, nil
 }
 
@@ -187,7 +189,7 @@ func (c *Client) newRequest(method, path string, body interface{}) (*http.Reques
 	request.Header.Set("accept", "application/json")
 	log.Printf("Overriding the instance ID =====>>>", c.Config.InstanceID)
 	request.Header.Set("bluemix-instance", c.Config.InstanceID)
-	fmt.Println("Overriding the Config", c.Confi)
+	fmt.Println("Overriding the Config", c.Config)
 
 	return request, nil
 }
