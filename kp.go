@@ -262,6 +262,8 @@ func (c *Client) do(ctx context.Context, req *http.Request, res interface{}) (*h
 		req.Header.Set("x-kms-key-ring", c.Config.KeyRing)
 	}
 
+	fmt.Println("Header: %s, BODY: %s ================>", req.Header, req.Body)
+
 	// set request up to be retryable on 500-level http codes and client errors
 	retryableClient := getRetryableClient(&c.HttpClient)
 	retryableRequest, err := rhttp.FromRequest(req)
