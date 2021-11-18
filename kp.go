@@ -184,6 +184,8 @@ func (c *Client) newRequest(method, path string, body interface{}) (*http.Reques
 	}
 
 	request.Header.Set("accept", "application/json")
+	fmt.Println("Overriding the instance ID", c.Config.InstanceID)
+	request.Header.Set("bluemix-instance", c.Config.InstanceID)
 
 	return request, nil
 }
@@ -509,11 +511,11 @@ func noredact(s string, redactStrings []string) string {
 	return s
 }
 
-func (c *Client) Clone() *Client {
-	if iam.IsNil(c) {
-		return nil
-	}
-	clone := *c
-	clone.Config.Instance = c.Config.Instance.Clone()
-	return &clone
-}
+// func (c *Client) Clone() *Client {
+// 	if iam.IsNil(c) {
+// 		return nil
+// 	}
+// 	clone := *c
+// 	clone.= c.Config.Clone()
+// 	return &clone
+// }
