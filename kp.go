@@ -517,11 +517,8 @@ func noredact(s string, redactStrings []string) string {
 	return s
 }
 
-// func (c *Client) Clone() *Client {
-// 	if iam.IsNil(c) {
-// 		return nil
-// 	}
-// 	clone := *c
-// 	clone.= c.Config.Clone()
-// 	return &clone
-// }
+func (c *Client) Clone(config *ClientConfig) *Client {
+	return &Client {
+		Config: c.Config.Clone(config)
+	}
+}
