@@ -37,7 +37,7 @@ import (
 
 const (
 	// DefaultBaseURL ...
-	DefaultBaseURL = "https://us-south.kms.cloud.ibm.com"
+	DefaultBaseURL = "https://qa.us-south.kms.test.cloud.ibm.com"
 	// DefaultTokenURL ..
 	DefaultTokenURL = iam.IAMTokenURL
 
