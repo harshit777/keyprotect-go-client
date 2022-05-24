@@ -1,3 +1,4 @@
+//go:build integration
 // +build integration
 
 // Copyright 2019 IBM Corp.
@@ -103,6 +104,29 @@ func TestWrapUnwrap(t *testing.T) {
 			}
 		}
 	}
+}
+
+func TestWrapUnwrapWithAlias(t *testing.T) {
+	assert := assert.New(t)
+
+	c, err := NewIntegrationTestClient(t)
+	assert.NoError(err)
+
+	ctx := context.Background()
+	crk, err := c.CreateKey(ctx, "kptest-crk", nil, false)
+	assert.NoError(err)
+	t.Logf("CRK created successfully: id=%s\n", crk.ID)
+
+	crkAlias, err := c.CreateKeyAlias(ctx, "aliastestnewcheck", crk.ID)
+	assert.NoError(err)
+	t.Logf("CRK Alias created successfully: id=%s\n", crkAlias)
+
+	ptDek, wdek, err := c.WrapCreateDEK(ctx, crkAlias.Alias, nil)
+	assert.NoError(err)
+
+	unwrapped, err := c.Unwrap(ctx, crkAlias.Alias, wdek, nil)
+	assert.EqualValues(unwrapped, ptDek)
+
 }
 
 func TestRotatedKeyHasLastUpdatedAndRotated(t *testing.T) {
