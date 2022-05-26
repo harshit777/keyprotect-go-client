@@ -302,6 +302,7 @@ func (c *Client) ListKeys(ctx context.Context, listKeysOptions *ListKeysOptions)
 	if err != nil {
 		return nil, err
 	}
+	fmt.Println("Hello")
 
 	// extracting the query parameters and encoding the same in the request url
 	if listKeysOptions != nil {
