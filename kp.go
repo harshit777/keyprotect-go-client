@@ -508,3 +508,32 @@ func redact(s string, redactStrings []string) string {
 func noredact(s string, redactStrings []string) string {
 	return s
 }
+
+func (search *KeySearchParam) WithEscape(input ...string) *KeySearchParam {
+	*search = append(*search, "escape:")
+	*search = append(*search, input...)
+	return search
+}
+
+func (search *KeySearchParam) WithNot(input ...string) *KeySearchParam {
+	*search = append(*search, "not:")
+	*search = append(*search, input...)
+	return search
+}
+
+func (search *KeySearchParam) WithExact(input ...string) *KeySearchParam {
+	*search = append(*search, "exact:")
+	*search = append(*search, input...)
+	return search
+}
+
+func (search *KeySearchParam) WithAlias(input ...string) *KeySearchParam {
+	*search = append(*search, "alias:")
+	*search = append(*search, input...)
+	return search
+}
+
+func (search *KeySearchParam) WithName(input ...string) *KeySearchParam {
+	*search = append(*search, "name:")
+	return search
+}

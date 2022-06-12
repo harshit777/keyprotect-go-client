@@ -41,6 +41,8 @@ type PreferReturn int
 
 type KeyState uint32
 
+type KeySearchParam []string
+
 // https://cloud.ibm.com/docs/key-protect?topic=key-protect-key-states
 const (
 	Active KeyState = iota + 1
@@ -292,6 +294,7 @@ type ListKeysOptions struct {
 	Limit       *uint32
 	Offset      *uint32
 	State       []KeyState
+	Search      KeySearchParam
 }
 
 // ListKeys retrieves a list of keys that are stored in your Key Protect service instance.
@@ -322,6 +325,13 @@ func (c *Client) ListKeys(ctx context.Context, listKeysOptions *ListKeysOptions)
 		}
 		if listKeysOptions.Extractable != nil {
 			values.Set("extractable", fmt.Sprint(*listKeysOptions.Extractable))
+		}
+		if listKeysOptions.Search != nil {
+			var search []string
+			for _, i := range listKeysOptions.Search {
+				search = append(search, i)
+			}
+			values.Set("search", strings.Join(search, ""))
 		}
 		req.URL.RawQuery = values.Encode()
 	}
