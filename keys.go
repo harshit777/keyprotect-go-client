@@ -122,7 +122,7 @@ type KeysActionRequest struct {
 	KeyVersionDetails   *KeyVersion `json:"keyVersion"`
 }
 
-type KeyWrapResponse struct {
+type KeyActionResponse struct {
 	PlainText         string     `json:"plaintext,omitempty"`
 	CipherText        string     `json:"ciphertext,omitempty"`
 	KeyVersionDetails KeyVersion `json:"keyVersion"`
@@ -555,9 +555,10 @@ func (c *Client) wrap(ctx context.Context, idOrAlias string, plainText []byte, a
 	return pt, ct, nil
 }
 
-func (c *Client) WrapWithKeyVersion(ctx context.Context, idOrAlias string, plainText []byte, additionalAuthData *[]string) (*KeyWrapResponse, error) {
+// WrapWithKeyVersion function supports KeyVersion Details, PlainText and Cyphertext in response
+func (c *Client) WrapWithKeyVersion(ctx context.Context, idOrAlias string, plainText []byte, additionalAuthData *[]string) (*KeyActionResponse, error) {
 	keysActionReq := &KeysActionRequest{}
-	keyActionRes := &KeyWrapResponse{}
+	keyActionRes := &KeyActionResponse{}
 
 	if plainText != nil {
 		_, err := base64.StdEncoding.DecodeString(string(plainText))
@@ -576,7 +577,7 @@ func (c *Client) WrapWithKeyVersion(ctx context.Context, idOrAlias string, plain
 		return keyActionRes, err
 	}
 
-	keyActionRes = &KeyWrapResponse{
+	keyActionRes = &KeyActionResponse{
 		PlainText:  keysAction.PlainText,
 		CipherText: keysAction.CipherText,
 		KeyVersionDetails: KeyVersion{

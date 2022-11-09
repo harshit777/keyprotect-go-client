@@ -108,6 +108,50 @@ func TestWrapUnwrap(t *testing.T) {
 	}
 }
 
+func TestWrapUnwrapWithKeyVersion(t *testing.T) {
+	assert := assert.New(t)
+
+	c, err := NewIntegrationTestClient(t)
+	assert.NoError(err)
+
+	ctx := context.Background()
+
+	keys, err := c.GetKeys(ctx, 0, 0)
+	assert.NoError(err)
+
+	for _, key := range keys.Keys {
+		t.Logf("%+v\n", key)
+	}
+
+	crk, err := c.CreateKey(ctx, "kptest-crk", nil, false)
+	assert.NoError(err)
+	t.Logf("CRK created successfully: id=%s\n", crk.ID)
+
+	wrapWithKeyVersion, err := c.WrapWithKeyVersion(ctx, crk.ID, nil, nil)
+	assert.NoError(err)
+
+	unwrapped, err := c.Unwrap(ctx, crk.ID, []byte(wrapWithKeyVersion.CipherText), nil)
+	assert.EqualValues(unwrapped, wrapWithKeyVersion.PlainText)
+
+	getKeyVersion, err := c.ListKeyVersions(ctx, crk.ID, nil)
+	assert.NoError(err)
+	assert.EqualValues(getKeyVersion.KeyVersion[0].ID, wrapWithKeyVersion.KeyVersionDetails.ID)
+
+	keys, err = c.GetKeys(context.Background(), 0, 0)
+	assert.NoError(err)
+
+	for _, key := range keys.Keys {
+		if key.Name == "kptest-crk" {
+			_, err := c.DeleteKey(ctx, key.ID, 0)
+			if err != nil {
+				t.Logf("Error deleting key: %s\n", err)
+			} else {
+				t.Logf("Key deleted: id=%s\n", key.ID)
+			}
+		}
+	}
+}
+
 func TestWrapUnwrapWithAlias(t *testing.T) {
 	assert := assert.New(t)
 
